@@ -15,13 +15,10 @@ struct Edge {
 };
 
 template<typename Vertex, typename Distance = double>
-bool operator==(const Edge<Vertex, Distance>& left, const Edge<Vertex, Distance>& right) {
-    return (left.from == right.from) && (left.to == right.to) && (left.dist == right.dist);
-}
-
-template<typename Vertex, typename Distance = double>
-bool operator!=(const Edge<Vertex, Distance>& left, const Edge<Vertex, Distance>& right) {
-    return !(left == right);
+bool equals(const Edge<Vertex, Distance>& left, const Edge<Vertex, Distance>& right, bool with_dist = false) {
+    if(with_dist)
+        return (left.from == right.from) && (left.to == right.to) && (left.dist == right.dist);
+    return (left.from == right.from) && (left.to == right.to);
 }
 
 template<typename Vertex, typename Distance = double>
@@ -30,7 +27,7 @@ private:
     vector<Vertex> _vertices;
     vector<Edge<Vertex, Distance>> _edges;
 public:
-    Graph() : _edges(vector<Edge>()), _vertices(vector<Vertex>()) {};
+    Graph() : _edges(vector<Edge<Vertex, Distance>>()), _vertices(vector<Vertex>()) {};
 
     //проверка-добавление-удаление вершин
     bool has_vertex(const Vertex& v) const {
@@ -48,12 +45,21 @@ public:
     bool remove_vertex(const Vertex& v) {
         if (!has_vertex(v))
             return false;
-        for (int i = 0; i < _vertices.size()) {
+
+        for (int i = 0; i < _vertices.size(); i++) {
             if (_vertices[i] == v) {
                 _vertices.erase(_vertices.begin() + i);
-                return true;
+                break;
             }
         }
+
+        for (int i = 0; i < _edges.size(); i++) {
+            if (_edges[i].to == v || _edges[i].from == v) {
+                remove_edge(_edges[i]);
+                i--;
+            }
+        }
+        return true;
     }
 
     std::vector<Vertex> vertices() const {
@@ -65,13 +71,28 @@ public:
     void add_edge(const Vertex& from, const Vertex& to,
         const Distance& d) {
         Edge<Vertex, Distance> e(from, to, d);
-        if (!has_edge(e))
+        if (has_vertex(from) && has_vertex(to))
             _edges.push_back(e);
     }
 
-    bool remove_edge(const Vertex& from, const Vertex& to);
+    bool remove_edge(const Vertex& from, const Vertex& to) {
+        for (int i = 0; i < _edges.size(); i++) {
+            if (_edges[i].from == from && _edges[i].to == to)
+                _edges.erase(_edges.begin() + i);
+                return true;
+        }
+        return false;
+    }
 
-    bool remove_edge(const Edge<Vertex, Distance>& e); //c учетом расстояния
+    //c учетом расстояния
+    bool remove_edge(const Edge<Vertex, Distance>& e) {
+        for (int i = 0; i < _edges.size(); i++) {
+            if (_edges[i].from == e.from && _edges[i].to == e.to && _edges[i].dist == e.dist)
+                _edges.erase(_edges.begin() + i);
+            return true;
+        }
+        return false;
+    }
 
     bool has_edge(const Vertex& from, const Vertex& to) const {
         for (const Edge<Vertex, Distance>& edge : _edges) {
@@ -84,17 +105,37 @@ public:
     //c учетом расстояния в Edge
     bool has_edge(const Edge<Vertex, Distance>& e) {
         for (const Edge<Vertex, Distance>& edge : _edges) {
-            if (edge.from == from && edge.to == to && edge.dist == e.dist)
+            if (edge.from == e.from && edge.to == e.to && edge.dist == e.dist)
                 return true;
         }
         return false;
     } 
 
     //получение всех ребер, выходящих из вершины
-    std::vector<Edge<Vertex, Distance>> edges(const Vertex& vertex);
+    std::vector<Edge<Vertex, Distance>> edges(const Vertex& vertex) {
+        vector<Edge<Vertex, Distance>> res;
+        for (auto edge : _edges) {
+            if (edge.from == vertex) {
+                res.push_back(edge);
+            }
+        }
+        return res;
+    }
 
-    size_t order() const; //порядок 
-    size_t degree(const Vertex& v) const; //степень вершины
+    //порядок 
+    size_t order() const {
+        return (size_t)_vertices.size();
+    }
+
+    //степень вершины
+    size_t degree(const Vertex& v) const {
+        size_t res = 0;
+        for (const auto& edge : _edges) {
+            if (edge.from == v)
+                res += 1;
+        }
+        return res;
+    }
 
 
     //поиск кратчайшего пути
