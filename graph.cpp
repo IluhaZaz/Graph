@@ -1,6 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+#include <set>
+#include <iterator>
+#include <algorithm>
 
 using namespace std;
 
@@ -13,6 +17,15 @@ struct Edge {
     Edge(Vertex from, Vertex to) : from(from), to(to), dist(0) {};
     Edge(Vertex from, Vertex to, Distance dist) : from(from), to(to), dist(dist) {};
 };
+
+//template<typename Vertex>
+//set<Vertex> difference(const set<Vertex>& first, const set<Vertex>& second) {
+//    set<Vertex> res;
+//    
+//    for (const Vertex v : first) {
+//
+//    }
+//}
 
 template<typename Vertex, typename Distance = double>
 bool equals(const Edge<Vertex, Distance>& left, const Edge<Vertex, Distance>& right, bool with_dist = false) {
@@ -66,6 +79,19 @@ public:
         return _vertices;
     }
 
+    set<Vertex> vertices(const Vertex& start) const {
+
+        set<Vertex> res;
+
+        vector<Edge<Vertex, Distance>> e = edges(start);
+
+        for (const auto& edge : e) {
+            res.insert(edge.to);
+        }
+
+        return res;
+    }
+
 
     //проверка-добавление-удаление ребер
     void add_edge(const Vertex& from, const Vertex& to,
@@ -112,7 +138,7 @@ public:
     } 
 
     //получение всех ребер, выходящих из вершины
-    std::vector<Edge<Vertex, Distance>> edges(const Vertex& vertex) {
+    std::vector<Edge<Vertex, Distance>> edges(const Vertex& vertex) const {
         vector<Edge<Vertex, Distance>> res;
         for (auto edge : _edges) {
             if (edge.from == vertex) {
@@ -140,7 +166,33 @@ public:
 
     //поиск кратчайшего пути
     std::vector<Edge<Vertex, Distance>> shortest_path(const Vertex& from,
-        const Vertex& to) const;
+        const Vertex& to) const {
+
+    }
+
+    void dfs(const Vertex& start, set<Vertex>& visited) const {
+        visited.insert(start);
+
+        cout << start << " ";
+
+        set<Vertex> neighbours = vertices(start);
+
+        set<Vertex> next;
+
+        std::set_difference(neighbours.begin(), neighbours.end(), visited.begin(), visited.end(),
+            std::inserter(next, next.begin()));
+
+        for (const auto& v : next) {
+            dfs(v, visited);
+        }
+    }
+
     //обход
-    std::vector<Vertex>  walk(const Vertex& start_vertex)const;
+    std::vector<Vertex>  walk(const Vertex& start_vertex)const {
+        set<Vertex> visited;
+
+        dfs(start_vertex, visited);
+
+        return vector<Vertex>(visited.begin(), visited.end());
+    }
 };

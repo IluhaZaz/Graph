@@ -68,3 +68,16 @@ TEST(GraphTests, EdgeCheck) {
 	EXPECT_FALSE(g.has_edge(2, 3));
 	EXPECT_TRUE(g.has_edge(Edge<int, double>(3, 4, 12)));
 }
+
+TEST(GraphTests, WalkCheck) {
+	Graph<int> g;
+	for (int i = 0; i < 9; i++)
+		g.add_vertex(i);
+	g.add_edge(1, 2, 3);
+	g.add_edge(2, 1, 6);
+	g.add_edge(2, 3, 1);
+	g.add_edge(3, 4, 12);
+	g.add_edge(4, 6, 3);
+
+	g.walk(1);
+}
