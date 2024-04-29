@@ -151,6 +151,14 @@ public:
         return res;
     }
 
+    Edge<Vertex, Distance> get_edge(const Vertex& from, const Vertex& to) const {
+        for (const Edge<Vertex, Distance>& edge : _edges) {
+            if (edge.from == from && edge.to == to)
+                return edge;
+        }
+        throw runtime_error("No such edge range");
+    }
+
     //порядок 
     size_t order() const {
         return (size_t)_vertices.size();
@@ -202,7 +210,13 @@ public:
     }
 
     //поиск кратчайшего пути
-    map<Vertex, Vertex> shortest_path(const Vertex& from,
+    void print_path(vector<Edge<Vertex, Distance>>& path) const {
+        for (const auto& edge : path) {
+            cout << edge.from << "->" << edge.to << '(' << edge.dist << ')' << endl;
+        }
+    }
+
+    vector<Edge<Vertex, Distance>> shortest_path(const Vertex& from,
         const Vertex& to) const {
 
         vector<Vertex> unvisited = vertices();
@@ -239,6 +253,33 @@ public:
                     break;
             unvisited.erase(unvisited.begin() + i);
         }
-        return path;
+
+        vector<Edge<Vertex, Distance>> res;
+
+        Vertex last = to;
+        Vertex pre_last = path.at(last);
+
+        while(pre_last) {
+            res.push_back(get_edge(pre_last, last));
+            last = pre_last;
+            pre_last = path.at(last);
+        }
+
+        res.push_back(get_edge(from, last));
+        
+        auto left = res.begin();
+        auto right = res.end() - 1;
+
+        for (int i = 0; i < res.size() / 2; i++) {
+            Edge<Vertex, Distance> temp = *left;
+            *left = *right;
+            *right = temp;
+            left++;
+            right--;
+        }
+
+        print_path(res);
+
+        return res;
     }
 };

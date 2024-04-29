@@ -95,5 +95,23 @@ TEST(GraphTests, ShortestPathCheck) {
 	g.add_edge(5, 6, 3);
 	g.add_edge(6, 7, 5);
 
-	map<int, int> rs = g.shortest_path(0, 7);
+	vector<Edge<int>> rs = g.shortest_path(0, 6);
+}
+
+TEST(GraphTests, ShortestPathCheck2) {
+	Graph<int> g;
+	for (int i = 0; i < 8; i++)
+		g.add_vertex(i);
+	g.add_edge(0, 1, 1);
+	g.add_edge(0, 2, 3);
+	g.add_edge(0, 3, 3);
+	g.add_edge(1, 4, 5);
+	g.add_edge(2, 4, 1);
+	g.add_edge(3, 4, 1);
+	g.add_edge(4, 5, 4);
+	g.add_edge(4, 6, 7);
+	g.add_edge(6, 7, 5);
+	g.add_edge(5, 7, 1);
+
+	vector<Edge<int>> rs = g.shortest_path(0, 7);
 }
