@@ -5,6 +5,9 @@
 #include <set>
 #include <iterator>
 #include <algorithm>
+#include <limits>
+#include <map>
+#include <exception>
 
 using namespace std;
 
@@ -75,18 +78,18 @@ public:
         return true;
     }
 
-    std::vector<Vertex> vertices() const {
+    vector<Vertex> vertices() const {
         return _vertices;
     }
 
-    set<Vertex> vertices(const Vertex& start) const {
+    vector<Vertex> vertices(const Vertex& start) const {
 
-        set<Vertex> res;
+        vector<Vertex> res;
 
         vector<Edge<Vertex, Distance>> e = edges(start);
 
         for (const auto& edge : e) {
-            res.insert(edge.to);
+            res.push_back(edge.to);
         }
 
         return res;
@@ -163,19 +166,12 @@ public:
         return res;
     }
 
-
-    //поиск кратчайшего пути
-    std::vector<Edge<Vertex, Distance>> shortest_path(const Vertex& from,
-        const Vertex& to) const {
-
-    }
-
     void dfs(const Vertex& start, set<Vertex>& visited) const {
         visited.insert(start);
 
         cout << start << " ";
 
-        set<Vertex> neighbours = vertices(start);
+        vector<Vertex> neighbours = vertices(start);
 
         set<Vertex> next;
 
@@ -194,5 +190,55 @@ public:
         dfs(start_vertex, visited);
 
         return vector<Vertex>(visited.begin(), visited.end());
+    }
+
+    Distance value(const Vertex& from, const Vertex& to) const {
+        for (const auto& edge : _edges) {
+            if (edge.to == to && edge.from == from) {
+                return edge.dist;
+            }
+        }
+        throw runtime_error("No such value");
+    }
+
+    //поиск кратчайшего пути
+    map<Vertex, Vertex> shortest_path(const Vertex& from,
+        const Vertex& to) const {
+
+        vector<Vertex> unvisited = vertices();
+        map<Vertex, Distance> shortest;
+        map<Vertex, Vertex> path;
+
+        for (const Vertex& v : unvisited) {
+            shortest[v] = numeric_limits<Distance>::max();
+        }
+        shortest[unvisited[0]] = 0;
+
+        while (!unvisited.empty()) {
+            Vertex curr_min = unvisited[0];
+
+            for (const Vertex v : unvisited) {
+                if (shortest[v] < shortest[curr_min]) {
+                    curr_min = v;
+                }
+            }
+
+            vector<Vertex> neighbors = vertices(curr_min);
+
+            for (const Vertex neighbor : neighbors) {
+                Distance tentative_value = shortest[curr_min] + value(curr_min, neighbor);
+                if (tentative_value < shortest[neighbor]) {
+                    shortest[neighbor] = tentative_value;
+                    path[neighbor] = curr_min;
+                }
+            }
+
+            int i = 0;
+            for (; i < unvisited.size(); i++)
+                if (unvisited[i] == curr_min)
+                    break;
+            unvisited.erase(unvisited.begin() + i);
+        }
+        return path;
     }
 };

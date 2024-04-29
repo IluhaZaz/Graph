@@ -79,5 +79,21 @@ TEST(GraphTests, WalkCheck) {
 	g.add_edge(3, 4, 12);
 	g.add_edge(4, 6, 3);
 
-	g.walk(1);
+	g.walk(2);
+}
+
+TEST(GraphTests, ShortestPathCheck) {
+	Graph<int> g;
+	for (int i = 0; i < 8; i++)
+		g.add_vertex(i);
+	g.add_edge(0, 1, 3);
+	g.add_edge(1, 2, 1);
+	g.add_edge(1, 3, 3);
+	g.add_edge(2, 6, 2);
+	g.add_edge(3, 6, 1);
+	g.add_edge(4, 5, 4);
+	g.add_edge(5, 6, 3);
+	g.add_edge(6, 7, 5);
+
+	map<int, int> rs = g.shortest_path(0, 7);
 }
