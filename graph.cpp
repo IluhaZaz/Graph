@@ -98,10 +98,14 @@ public:
 
     //проверка-добавление-удаление ребер
     void add_edge(const Vertex& from, const Vertex& to,
-        const Distance& d) {
+        const Distance& d, bool oriented = true) {
         Edge<Vertex, Distance> e(from, to, d);
         if (has_vertex(from) && has_vertex(to))
             _edges.push_back(e);
+        if (!oriented) {
+            if (has_vertex(from) && has_vertex(to))
+                _edges.push_back(Edge<Vertex, Distance> (to, from, d));
+        }
     }
 
     bool remove_edge(const Vertex& from, const Vertex& to) {
@@ -184,7 +188,7 @@ public:
         set<Vertex> next;
 
         std::set_difference(neighbours.begin(), neighbours.end(), visited.begin(), visited.end(),
-            std::inserter(next, next.begin()));
+std::inserter(next, next.begin()));
 
         for (const auto& v : next) {
             dfs(v, visited);
@@ -216,9 +220,7 @@ public:
         }
     }
 
-    vector<Edge<Vertex, Distance>> shortest_path(const Vertex& from,
-        const Vertex& to) const {
-
+    pair<map<Vertex, Distance>, map<Vertex, Vertex>>  dijkstras_algorithm(const Vertex& from) const {
         vector<Vertex> unvisited = vertices();
         map<Vertex, Distance> shortest;
         map<Vertex, Vertex> path;
@@ -226,7 +228,7 @@ public:
         for (const Vertex& v : unvisited) {
             shortest[v] = numeric_limits<Distance>::max();
         }
-        shortest[unvisited[0]] = 0;
+        shortest[from] = 0;
 
         while (!unvisited.empty()) {
             Vertex curr_min = unvisited[0];
@@ -254,19 +256,32 @@ public:
             unvisited.erase(unvisited.begin() + i);
         }
 
+        return pair(shortest, path);
+    }
+
+    vector<Edge<Vertex, Distance>> shortest_path(const Vertex& from,
+        const Vertex& to) const {
+
+        if (from == to)
+            return vector<Edge<Vertex, Distance>>();
+
+        auto p = dijkstras_algorithm(from);
+        map<Vertex, Distance> shortest = p.first;
+        map<Vertex, Vertex> path = p.second;
+
         vector<Edge<Vertex, Distance>> res;
 
         Vertex last = to;
-        Vertex pre_last = path.at(last);
+        Vertex pre_last = path[last];
 
-        while(pre_last) {
+        while (pre_last) {
             res.push_back(get_edge(pre_last, last));
             last = pre_last;
             pre_last = path.at(last);
         }
 
         res.push_back(get_edge(from, last));
-        
+
         auto left = res.begin();
         auto right = res.end() - 1;
 
@@ -281,5 +296,45 @@ public:
         print_path(res);
 
         return res;
+    }
+
+    Distance shortest_path_val(const Vertex& from, const Vertex& to) const {
+        vector<Edge<Vertex, Distance>> path = shortest_path(from, to);
+
+        Distance res = 0;
+
+        for (const auto& edge : path)
+            res += edge.dist;
+        return res;
+    }
+
+    //Задача №2
+
+    Vertex find_centroid() {
+
+        map<Vertex, int> table;
+
+        for (const Vertex v : _vertices) {
+
+            Distance eps = numeric_limits<int>::min();
+
+            auto p = dijkstras_algorithm(v);
+            map<Vertex, Distance> shortest = p.first;
+
+            for (const auto& pair: shortest) {
+                eps = max(eps, pair.second);
+            }
+            
+            table[v] = eps;
+        }
+
+        pair<Vertex, int> res = pair(_vertices[0], table[_vertices[0]]);
+
+        for (const auto& pair : table) {
+            if (pair.second < res.second)
+                res = pair;
+        }
+
+        return res.first;
     }
 };
