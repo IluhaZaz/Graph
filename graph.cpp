@@ -21,16 +21,7 @@ struct Edge {
     Edge(Vertex from, Vertex to, Distance dist) : from(from), to(to), dist(dist) {};
 };
 
-//template<typename Vertex>
-//set<Vertex> difference(const set<Vertex>& first, const set<Vertex>& second) {
-//    set<Vertex> res;
-//    
-//    for (const Vertex v : first) {
-//
-//    }
-//}
-
-template<typename Vertex, typename Distance = double>
+template<typename Vertex, typename Distance>
 bool equals(const Edge<Vertex, Distance>& left, const Edge<Vertex, Distance>& right, bool with_dist = false) {
     if(with_dist)
         return (left.from == right.from) && (left.to == right.to) && (left.dist == right.dist);
@@ -160,7 +151,7 @@ public:
             if (edge.from == from && edge.to == to)
                 return edge;
         }
-        throw runtime_error("No such edge range");
+        throw runtime_error("No such edge");
     }
 
     //порядок 
@@ -295,16 +286,6 @@ std::inserter(next, next.begin()));
 
         print_path(res);
 
-        return res;
-    }
-
-    Distance shortest_path_val(const Vertex& from, const Vertex& to) const {
-        vector<Edge<Vertex, Distance>> path = shortest_path(from, to);
-
-        Distance res = 0;
-
-        for (const auto& edge : path)
-            res += edge.dist;
         return res;
     }
 
