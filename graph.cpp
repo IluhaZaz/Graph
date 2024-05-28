@@ -211,7 +211,19 @@ std::inserter(next, next.begin()));
         }
     }
 
+    bool have_negative_v() const  {
+        for (const auto& edge : _edges) {
+            if (edge.dist < 0)
+                return true;
+        }
+        return false;
+    }
+
     pair<map<Vertex, Distance>, map<Vertex, Vertex>>  dijkstras_algorithm(const Vertex& from) const {
+
+        if (have_negative_v())
+            throw runtime_error("Can't use with negative vercites");
+
         vector<Vertex> unvisited = vertices();
         map<Vertex, Distance> shortest;
         map<Vertex, Vertex> path;
