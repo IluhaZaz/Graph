@@ -100,22 +100,26 @@ public:
     }
 
     bool remove_edge(const Vertex& from, const Vertex& to) {
+        bool flag = false;
         for (int i = 0; i < _edges.size(); i++) {
-            if (_edges[i].from == from && _edges[i].to == to)
+            if (_edges[i].from == from && _edges[i].to == to) {
                 _edges.erase(_edges.begin() + i);
-                return true;
+                flag = true;
+            }
         }
-        return false;
+        return flag;
     }
 
     //c учетом расстояния
     bool remove_edge(const Edge<Vertex, Distance>& e) {
+        bool flag = false;
         for (int i = 0; i < _edges.size(); i++) {
-            if (_edges[i].from == e.from && _edges[i].to == e.to && _edges[i].dist == e.dist)
+            if (_edges[i].from == e.from && _edges[i].to == e.to && _edges[i].dist == e.dist) {
                 _edges.erase(_edges.begin() + i);
-            return true;
+                flag = true;
+            }
         }
-        return false;
+        return flag;
     }
 
     bool has_edge(const Vertex& from, const Vertex& to) const {
@@ -170,6 +174,7 @@ public:
     }
 
     void dfs(const Vertex& start, set<Vertex>& visited) const {
+
         visited.insert(start);
 
         cout << start << " ";
